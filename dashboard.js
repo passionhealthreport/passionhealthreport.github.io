@@ -54,8 +54,7 @@ function createClient(entry, nColumns, uid) {
         q13: entry[nColumns*matchId+14].content.$t,
         q14: entry[nColumns*matchId+15].content.$t,
         q15: entry[nColumns*matchId+16].content.$t,
-        q16: _score,
-        subjective: entry[nColumns*matchId+17].content.$t, // Subjective overall score
+        q16: entry[nColumns*matchId+17].content.$t, // Subjective overall score
     }
 
     return client;

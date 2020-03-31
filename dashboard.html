@@ -77,7 +77,7 @@
               pointBorderColor: "#fff",
               pointBackgroundColor: "rgba(255,99,132,1)",
               pointBorderColor: "#fff",
-              data: Array(nAreas-1).fill(client['subjective']),
+              data: Array(nAreas-1).fill(client['q16']),
             }]
           }
 
@@ -155,7 +155,6 @@
 
           // Inject data into dashboard
           for (i = 1; i <= nAreas; i++){
-            console.log(i)
             appendCategoryElements(i)
 
             q = "#q" + i.toString()
@@ -163,22 +162,12 @@
 
             category = getScoreCategory(client[qq])
 
-            // Last area is overall passion
-            if (i == nAreas) {
-              $(q+"-score").html("<strong>Your overall passion score is " + client['score'] + '/10</strong>')
-              console.log(response)
-              console.log(response[qq])
-              console.log(category)
-              console.log(response[qq][category])
-              $(q+"-main").text(response[qq][category]['main'])
-            } else {
-              bonusHTML = formatBonusText(response[qq][category]['bonus'])
-              explanationHTML = formatExplanation(response[qq]['explanation'])
-              $(q+"-explanation").html(explanationHTML)
-              $(q+"-score").html("<strong>You scored " + client[qq] + '/10</strong> when asked: <em>' + questions[i-1] + "</em>")
-              $(q+"-bonus").html(bonusHTML)
-              $(q+"-main").text(response[qq][category]['main'])
-            }
+            bonusHTML = formatBonusText(response[qq][category]['bonus'])
+            explanationHTML = formatExplanation(response[qq]['explanation'])
+            $(q+"-explanation").html(explanationHTML)
+            $(q+"-score").html("<strong>You scored " + client[qq] + '/10</strong> when asked: <em>' + questions[i-1] + "</em>")
+            $(q+"-bonus").html(bonusHTML)
+            $(q+"-main").text(response[qq][category]['main'])
           }
 
           $("#passion-chart").clone().attr('id', 'passion-chart2').appendTo("#dashboard");
