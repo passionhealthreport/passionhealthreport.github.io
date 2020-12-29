@@ -18,7 +18,7 @@ function getQuestions(entry, nAreas) {
     return questions
 }
 
-function createClient(entry, nColumns, uid) {
+function createClient(entry, nColumns, nNonScoreColumns, uid) {
     // Get matchId from uid
     matchId = getMatchID(entry, nColumns, uid);
 
@@ -28,11 +28,12 @@ function createClient(entry, nColumns, uid) {
     }
 
     let sum = 0
-    for (let i = 0; i < nColumns - 2; i++) {
+    let nScoreColumns = nColumns - nNonScoreColumns
+    for (let i = 0; i < nScoreColumns; i++) {
         sum += parseInt(entry[nColumns*matchId+i+2].content.$t)
     }
     // Normalize score to 0 to 10
-    let _score = Math.round(sum / (nColumns-2) * 10) / 10
+    let _score = Math.round(sum / nScoreColumns * 10) / 10
 
     // Stores scores and other information about user
     client = {
