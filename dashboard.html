@@ -111,10 +111,26 @@
         passionHealthCategoryUrl = sheetUrl.replace("/od6/", "/2/")
         passionHealthCalculatedUrl = sheetUrl.replace("/od6/", "/8/")
 
-        var passionHealthPromise = $.getJSON(passionHealthDBUrl);
-        var passionHealthResponsePromise = $.getJSON(passionHealthResponseUrl);
-        var passionHealthCategoryPromise = $.getJSON(passionHealthCategoryUrl);
-        var passionHealthCalculatedPromise = $.getJSON(passionHealthCalculatedUrl);
+        var passionHealthPromise = $.ajax({
+          dataType: "json",
+          url: passionHealthDBUrl,
+          retries: 5,
+        })
+        var passionHealthResponsePromise = $.ajax({
+          dataType: "json",
+          url: passionHealthResponseUrl,
+          retries: 5,
+        })
+        var passionHealthCategoryPromise = $.ajax({
+          dataType: "json",
+          url: passionHealthCategoryUrl,
+          retries: 5,
+        })
+        var passionHealthCalculatedPromise = $.ajax({
+          dataType: "json",
+          url: passionHealthCalculatedUrl,
+          retries: 5,
+        })
 
         // Execute after both JSON requests have completed
         $.when(passionHealthPromise, passionHealthResponsePromise, passionHealthCategoryPromise, passionHealthCalculatedPromise).then(
