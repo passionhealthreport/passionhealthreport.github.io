@@ -202,10 +202,10 @@
 
         // Execute after both JSON requests have completed
         let dataPassionHealthTest = await passionHealthPromise()
-        console.log(dataPassionHealthTest)
         let dataPassionHealthResponse = await passionHealthResponsePromise()
         let dataPassionHealthCategory = await passionHealthCategoryPromise()
         let dataPassionHealthCalculated = await passionHealthCalculatedPromise()
+        console.log(7)
 
         // Get relavant data from spreadsheets
         entryPassionHealthTest = dataPassionHealthTest.feed.entry;
