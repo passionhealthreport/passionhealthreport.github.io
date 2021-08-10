@@ -114,22 +114,82 @@
         var passionHealthPromise = $.ajax({
           dataType: "json",
           url: passionHealthDBUrl,
-          retries: 5,
+          retryLimit: 5,
+          attempt: 1,
+          success: function (data) {
+            return data
+          },
+          error: function (data) {
+            if (this.attempt++ <= this.retryLimit) {
+              var self = this;
+              var retry = function () {
+                $.ajax(self);
+              };
+              setTimeout(retry, 1000);
+            } else {
+              return data
+            }
+          }
         })
         var passionHealthResponsePromise = $.ajax({
           dataType: "json",
           url: passionHealthResponseUrl,
-          retries: 5,
+          retryLimit: 5,
+          attempt: 1,
+          success: function (data) {
+            return data
+          },
+          error: function (data) {
+            if (this.attempt++ <= this.retryLimit) {
+              var self = this;
+              var retry = function () {
+                $.ajax(self);
+              };
+              setTimeout(retry, 1000);
+            } else {
+              return data
+            }
+          }
         })
         var passionHealthCategoryPromise = $.ajax({
           dataType: "json",
           url: passionHealthCategoryUrl,
-          retries: 5,
+          retryLimit: 5,
+          attempt: 1,
+          success: function (data) {
+            return data
+          },
+          error: function (data) {
+            if (this.attempt++ <= this.retryLimit) {
+              var self = this;
+              var retry = function () {
+                $.ajax(self);
+              };
+              setTimeout(retry, 1000);
+            } else {
+              return data
+            }
+          }
         })
         var passionHealthCalculatedPromise = $.ajax({
           dataType: "json",
           url: passionHealthCalculatedUrl,
-          retries: 5,
+          retryLimit: 5,
+          attempt: 1,
+          success: function (data) {
+            return data
+          },
+          error: function (data) {
+            if (this.attempt++ <= this.retryLimit) {
+              var self = this;
+              var retry = function () {
+                $.ajax(self);
+              };
+              setTimeout(retry, 1000);
+            } else {
+              return data
+            }
+          }
         })
 
         // Execute after both JSON requests have completed
