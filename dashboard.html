@@ -104,7 +104,7 @@
 
       }
 
-      $(function(){
+      $(async function(){
         // Get information from the row in the spreasheet that corresponds to uid
         passionHealthDBUrl = sheetUrl.replace("/od6/", "/"+dbIndex+"/")
         passionHealthResponseUrl = sheetUrl.replace("/od6/", "/1/")
@@ -201,66 +201,74 @@
         }
 
         // Execute after both JSON requests have completed
-        $.when(passionHealthPromise(), passionHealthResponsePromise(), passionHealthCategoryPromise(), passionHealthCalculatedPromise()).done(
-          function(dataPassionHealthTest, dataPassionHealthResponse, dataPassionHealthCategory, dataPassionHealthCalculated) {
-          // Get relavant data from spreadsheets
-          entryPassionHealthTest = dataPassionHealthTest[0].feed.entry;
-          entryPassionHealthResponse = dataPassionHealthResponse[0].feed.entry;
-          entryPassionHealthCategory = dataPassionHealthCategory[0].feed.entry;
-          entryPassionHealthCalculated = dataPassionHealthCalculated[0].feed.entry;
+        let dataPassionHealthTest = await passionHealthPromise()
+        console.log(dataPassionHealthTest)
+        let dataPassionHealthResponse = await passionHealthResponsePromise()
+        let dataPassionHealthCategory = await passionHealthCategoryPromise()
+        let dataPassionHealthCalculated = await passionHealthCalculatedPromise()
 
-          // Create client object
-          client = createClient(entryPassionHealthTest, entryPassionHealthCalculated, nColumns, nNonScoreColumns, uid);
-          $("#card-title").text(client['name'] + "'s Passion Health Report")
+        // Get relavant data from spreadsheets
+        entryPassionHealthTest = dataPassionHealthTest.feed.entry;
+        entryPassionHealthResponse = dataPassionHealthResponse.feed.entry;
+        entryPassionHealthCategory = dataPassionHealthCategory.feed.entry;
+        entryPassionHealthCalculated = dataPassionHealthCalculated.feed.entry;
 
-          // Get Passion Health Categories as array
-          let categories = getPassionHealthCategories(entryPassionHealthCategory)
-          categories.pop()
+        console.log(entryPassionHealthTest)
+        console.log(entryPassionHealthResponse)
+        console.log(entryPassionHealthCategory)
+        console.log(entryPassionHealthCalculated)
 
-          // Get report text responses
-          let response = formatPassionResponseDB(entryPassionHealthResponse, nPassionResponseDBColumns, nAreas)
+        // Create client object
+        client = createClient(entryPassionHealthTest, entryPassionHealthCalculated, nColumns, nNonScoreColumns, uid);
+        $("#card-title").text(client['name'] + "'s Passion Health Report")
 
-          // Overview blurb text
-          let overallScoreCategory = getScoreCategory(client['score'])
-          let header = $("<h3></h3>").text("Your Passion Health Score: " + client['score'].toString() + "/10");
-          let blurb = $("<p></p>").text(response['score'][overallScoreCategory])
-          $("#blurb-dash").append(header, blurb);
+        // Get Passion Health Categories as array
+        let categories = getPassionHealthCategories(entryPassionHealthCategory)
+        categories.pop()
 
-          // Create chart
-          createChart('passion-chart')
+        // Get report text responses
+        let response = formatPassionResponseDB(entryPassionHealthResponse, nPassionResponseDBColumns, nAreas)
 
-          // Get question text
-          let questions = getQuestions(entryPassionHealthTest, nAreas)
+        // Overview blurb text
+        let overallScoreCategory = getScoreCategory(client['score'])
+        let header = $("<h3></h3>").text("Your Passion Health Score: " + client['score'].toString() + "/10");
+        let blurb = $("<p></p>").text(response['score'][overallScoreCategory])
+        $("#blurb-dash").append(header, blurb);
 
-          function appendCategoryElements(index) {
-            let header = $("<h3></h3>").text(entryPassionHealthCategory[index-1].content.$t);
-            let p_explanation = $("<p id=q"+index+"-explanation></p>")
-            let p_score = $("<strong><p id=q"+index+"-score></p></strong>")
-            let p_main = $("<p id=q"+index+"-main></p>")
-            let p_bonus = $("<p id=q"+index+"-bonus></p>")
-            $("#dashboard").append(header, p_explanation, p_score, p_main, p_bonus);
-          }
+        // Create chart
+        createChart('passion-chart')
 
-          // Inject data into dashboard
-          for (i = 1; i <= nAreas; i++){
-            appendCategoryElements(i)
+        // Get question text
+        let questions = getQuestions(entryPassionHealthTest, nAreas)
 
-            q = "#q" + i.toString()
-            qq = "q" + i.toString()
+        function appendCategoryElements(index) {
+          let header = $("<h3></h3>").text(entryPassionHealthCategory[index-1].content.$t);
+          let p_explanation = $("<p id=q"+index+"-explanation></p>")
+          let p_score = $("<strong><p id=q"+index+"-score></p></strong>")
+          let p_main = $("<p id=q"+index+"-main></p>")
+          let p_bonus = $("<p id=q"+index+"-bonus></p>")
+          $("#dashboard").append(header, p_explanation, p_score, p_main, p_bonus);
+        }
 
-            category = getScoreCategory(client[qq])
+        // Inject data into dashboard
+        for (i = 1; i <= nAreas; i++){
+          appendCategoryElements(i)
 
-            bonusHTML = formatBonusText(response[qq][category]['bonus'])
-            explanationHTML = formatExplanation(response[qq]['explanation'])
-            $(q+"-explanation").html(explanationHTML)
-            $(q+"-score").html("<strong>You scored " + client[qq] + '/10</strong> when asked: <em>' + questions[i-1] + "</em>")
-            $(q+"-bonus").html(bonusHTML)
-            $(q+"-main").text(response[qq][category]['main'])
-          }
+          q = "#q" + i.toString()
+          qq = "q" + i.toString()
 
-          $("#passion-chart").clone().attr('id', 'passion-chart2').appendTo("#dashboard");
-          createChart('passion-chart2')
-        });
+          category = getScoreCategory(client[qq])
+
+          bonusHTML = formatBonusText(response[qq][category]['bonus'])
+          explanationHTML = formatExplanation(response[qq]['explanation'])
+          $(q+"-explanation").html(explanationHTML)
+          $(q+"-score").html("<strong>You scored " + client[qq] + '/10</strong> when asked: <em>' + questions[i-1] + "</em>")
+          $(q+"-bonus").html(bonusHTML)
+          $(q+"-main").text(response[qq][category]['main'])
+        }
+
+        $("#passion-chart").clone().attr('id', 'passion-chart2').appendTo("#dashboard");
+        createChart('passion-chart2')
       });
     </script>
 
