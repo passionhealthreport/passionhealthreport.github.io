@@ -109,21 +109,24 @@
         passionHealthDBUrl = sheetUrl.replace("/od6/", "/"+dbIndex+"/")
         passionHealthResponseUrl = sheetUrl.replace("/od6/", "/1/")
         passionHealthCategoryUrl = sheetUrl.replace("/od6/", "/2/")
+        passionHealthCalculatedUrl = sheetUrl.replace("/od6/", "/8/")
 
         var passionHealthPromise = $.getJSON(passionHealthDBUrl);
         var passionHealthResponsePromise = $.getJSON(passionHealthResponseUrl);
         var passionHealthCategoryPromise = $.getJSON(passionHealthCategoryUrl);
+        var passionHealthCalculatedPromise = $.getJSON(passionHealthCalculatedUrl);
 
         // Execute after both JSON requests have completed
-        $.when(passionHealthPromise, passionHealthResponsePromise, passionHealthCategoryPromise).then(
-          function(dataPassionHealthTest, dataPassionHealthResponse, dataPassionHealthCategory) {
+        $.when(passionHealthPromise, passionHealthResponsePromise, passionHealthCategoryPromise, passionHealthCalculatedPromise).then(
+          function(dataPassionHealthTest, dataPassionHealthResponse, dataPassionHealthCategory, dataPassionHealthCalculated) {
           // Get relavant data from spreadsheets
           entryPassionHealthTest = dataPassionHealthTest[0].feed.entry;
           entryPassionHealthResponse = dataPassionHealthResponse[0].feed.entry;
           entryPassionHealthCategory = dataPassionHealthCategory[0].feed.entry;
+          entryPassionHealthCalculated = dataPassionHealthCalculated[0].feed.entry;
 
           // Create client object
-          client = createClient(entryPassionHealthTest, nColumns, nNonScoreColumns, uid);
+          client = createClient(entryPassionHealthTest, entryPassionHealthCalculated, nColumns, nNonScoreColumns, uid);
           $("#card-title").text(client['name'] + "'s Passion Health Report")
 
           // Get Passion Health Categories as array

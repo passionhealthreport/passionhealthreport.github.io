@@ -18,7 +18,7 @@ function getQuestions(entry, nAreas) {
     return questions
 }
 
-function createClient(entry, nColumns, nNonScoreColumns, uid) {
+function createClient(entry, calculated, nColumns, nNonScoreColumns, uid) {
     // Get matchId from uid
     matchId = getMatchID(entry, nColumns, uid);
 
@@ -55,7 +55,7 @@ function createClient(entry, nColumns, nNonScoreColumns, uid) {
         q13: entry[nColumns*matchId+14].content.$t,
         q14: entry[nColumns*matchId+15].content.$t,
         q15: entry[nColumns*matchId+16].content.$t,
-        q16: entry[nColumns*matchId+17].content.$t, // Subjective overall score
+        q16: calculated[4*matchId+2].content.$t, // Subjective overall score
     }
 
     return client;
