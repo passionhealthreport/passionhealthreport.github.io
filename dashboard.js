@@ -1,26 +1,14 @@
 function getMatchID(entry, nColumns, uid) {
-    let matchId = -1;
-    for (i = nColumns + 1; i < entry.length; i += nColumns) {
-        if (getHash(entry[i].content.$t) == uid) {
-            matchId = (i - 1) / nColumns;
-        }
+    let matchId = -1
+    for (const [idx, row] of entry.entries()) {
+      if (getHash(row[1]) == uid) matchId = idx
     }
-
     return matchId;
-}
-
-function getQuestions(entry, nAreas) {
-    questions = []
-    for(i = 0; i < nAreas; i++) {
-        questions.push(entry[i+2].content.$t)
-    }
-
-    return questions
 }
 
 function createClient(entry, calculated, nColumns, nNonScoreColumns, uid) {
     // Get matchId from uid
-    matchId = getMatchID(entry, nColumns, uid);
+    const matchId = getMatchID(entry, nColumns, uid);
 
     if (matchId == -1) {
         alert("invalid UID")
@@ -29,33 +17,21 @@ function createClient(entry, calculated, nColumns, nNonScoreColumns, uid) {
 
     let sum = 0
     let nScoreColumns = nColumns - nNonScoreColumns
-    for (let i = 0; i < nScoreColumns; i++) {
-        sum += parseInt(entry[nColumns*matchId+i+2].content.$t)
+    for (let i = 2; i < nScoreColumns+2; i++) {
+        sum += parseInt(entry[matchId][i])
     }
+
     // Normalize score to 0 to 10
-    let _score = Math.round(sum / nScoreColumns * 10) / 10
+    const score = Math.round(sum / nScoreColumns * 10) / 10
 
     // Stores scores and other information about user
+    const [name, email, q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, q11, q12, q13, q14, q15] = entry[matchId]
     client = {
-        name: entry[nColumns*matchId].content.$t,
-        email: entry[nColumns*matchId+1].content.$t,
-        score: _score,
-        q1: entry[nColumns*matchId+2].content.$t,
-        q2: entry[nColumns*matchId+3].content.$t,
-        q3: entry[nColumns*matchId+4].content.$t,
-        q4: entry[nColumns*matchId+5].content.$t,
-        q5: entry[nColumns*matchId+6].content.$t,
-        q6: entry[nColumns*matchId+7].content.$t,
-        q7: entry[nColumns*matchId+8].content.$t,
-        q8: entry[nColumns*matchId+9].content.$t,
-        q9: entry[nColumns*matchId+10].content.$t,
-        q10: entry[nColumns*matchId+11].content.$t,
-        q11: entry[nColumns*matchId+12].content.$t,
-        q12: entry[nColumns*matchId+13].content.$t,
-        q13: entry[nColumns*matchId+14].content.$t,
-        q14: entry[nColumns*matchId+15].content.$t,
-        q15: entry[nColumns*matchId+16].content.$t,
-        q16: calculated[4*matchId+2].content.$t, // Subjective overall score
+        name, email, score,
+        q1, q2, q3, q4, q5,
+        q6, q7, q8, q9, q10,
+        q11, q12, q13, q14, q15,
+        q16: calculated[matchId][2], // Subjective overall score
     }
 
     return client;
@@ -76,30 +52,29 @@ function getHash(t) {
 }
 
 function formatPassionResponseDB(db, nColumns, nAreas) {
-    response = {}
-    levels = ["low", "med", "high", "max"]
-    for (i = 1; i <= nAreas; i++){
-        q = 'q' + i.toString()
+    let response = {}
+    const levels = ["low", "med", "high", "max"]
+    for (let i = 1; i <= nAreas; i++){
+        const q = 'q' + i.toString()
         response[q] = {}
-        response[q]["explanation"] = db[i*nColumns+1].content.$t
-        for (j = 0; j < levels.length; j++){
+        response[q]["explanation"] = db[i][1]
+        for (let j = 0; j < levels.length; j++){
             response[q][levels[j]] = {}
-            response[q][levels[j]]['main'] = db[i*nColumns+j+2].content.$t
+            response[q][levels[j]]['main'] = db[i][j+2]
 
             // "Max" does not have sell text
             if (j == levels.length - 1) {
                 response[q][levels[j]]['bonus'] = ""
             } else {
-                response[q][levels[j]]['bonus'] = db[(i+1)*nColumns-1].content.$t
+                response[q][levels[j]]['bonus'] = db[i][nColumns-1]
             }
         }
     }
 
     response['score'] = {}
     for (let i = 0; i < levels.length; i++){
-        response['score'][levels[i]] = db[(1+nAreas)*nColumns+i+1].content.$t
+        response['score'][levels[i]] = db[(1+nAreas)*nColumns+i+1]
     }
-    console.log(response)
 
     return response
 }
@@ -115,16 +90,16 @@ function formatBonusText(text) {
         text = text.replace("3 ", "</li><li>")
         text = text.replace("4 ", "</li><li>")
 
-        t0 = text.split("5 ")
-        t1 = t0[1].split("\n")
+        let t0 = text.split("5 ")
+        let t1 = t0[1].split("\n")
         text = t0[0] + "</li><li>" + t1.shift() + "</ol>"
 
         t1 = t1.join("<br/>")
         t1 = t1.replace("<br/>", "")
         t1 = t1.replace("<br/>", "")
         t1 = t1.split("- ").join("</li><li>")
-        t2 = t1.split(":")
-        t3 = t2.shift() + ":<ul><li>" + t2.join(":")
+        let t2 = t1.split(":")
+        let t3 = t2.shift() + ":<ul><li>" + t2.join(":")
         t3 = t3.replace("<br/><br/>", "</ul>")
 
         text = text + t3
@@ -135,11 +110,11 @@ function formatBonusText(text) {
     return text
 }
 
-function addSellLink(text) {
-    sellText = "comprehensive self-assessment called the Compass4System"
-    return text.replace(sellText,
-                        "<a href='http://thepassioncentre.com/'>"+sellText+"</a>")
-}
+// function addSellLink(text) {
+//     const sellText = "comprehensive self-assessment called the Compass4System"
+//     return text.replace(sellText,
+//                         "<a href='http://thepassioncentre.com/'>"+sellText+"</a>")
+// }
 
 function getScoreCategory(score) {
     if (score < 4){
@@ -153,19 +128,10 @@ function getScoreCategory(score) {
     }
 }
 
-function getPassionHealthCategories(data) {
-    categories = []
-    for (i=0; i<entryPassionHealthCategory.length; i++){
-        categories.push(data[i].content.$t)
-    }
-
-    return categories
-}
-
 function getClientScores(client, nAreas) {
-    scores = []
-    for (i=1; i<=nAreas; i++){
-        scores.push(client['q'+i.toString()])
+    let scores = []
+    for (let i=1; i<=nAreas; i++){
+        scores.push(parseFloat(client['q'+i.toString()]))
     }
 
     return scores

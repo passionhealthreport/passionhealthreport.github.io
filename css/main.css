@@ -1,6 +1,6 @@
 /* CUSTOM */
 
-#printButton {
+.printButton {
   background-color: rgb(255, 99, 132);
   border: none;
   color: white;

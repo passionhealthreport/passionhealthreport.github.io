@@ -11,6 +11,7 @@
     <script src="index.js"></script>
     <script src="dashboard.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
   </head>
   <body>
     <div class="s130">
@@ -21,11 +22,11 @@
                       <h1 id="card-title"></h1>
                       <p id="card-text"></p>
                       <div id="blurb-dash"></div>
-                      <button id="printButton" type="button" onclick="window.print()">Save Report as PDF</button>
+                      <button class="printButton" type="button" onclick="window.print()">Save Report as PDF</button>
                       <h3>Your Passion at a Glance</h3>
                       <canvas id="passion-chart" width="400" height="400"></canvas>
                     </div>
-                    <button id="printButton" type="button" onclick="window.print()">Save Report as PDF</button>
+                    <button class="printButton" type="button" onclick="window.print()">Save Report as PDF</button>
                 </div>
             </div>
         </form>
@@ -36,7 +37,7 @@
       // Get the uid from the URL query parameter (?uid=)
       const urlParams = new URLSearchParams(window.location.search);
       const uid = (urlParams.get('uid')).toString();
-      const dbIndex = (urlParams.get('db')).toString();
+      // const dbIndex = (urlParams.get('db')).toString();
 
       var client = {}
 
@@ -54,12 +55,12 @@
       // URL to google sheets
       var sheetUrl = "sheetUrl = 'https://spreadsheets.google.com/feeds/cells/1IUmIxekkrg5uE-XXHNZpKUfSue9ntsEoDw9-imypgxU/od6/public/values?alt=json'"
 
-      function createChart(chartID) {
+      function createChart(chartID, categories, client) {
           var ctx = document.getElementById(chartID).getContext('2d');
-          scores = getClientScores(client, nAreas)
+          const scores = getClientScores(client, nAreas)
           scores.pop()
 
-          chartData = {
+          const chartData = {
             labels: categories,
             datasets: [{
               label: "Your Actual Score",
@@ -68,7 +69,6 @@
               borderColor: "rgba(5, 155, 255, 1)",
               pointBorderColor: "#fff",
               pointBackgroundColor: "rgba(5, 155, 255, 1)",
-              pointBorderColor: "#fff",
               data: scores
             }, {
               label: "Your Percieved Score",
@@ -77,7 +77,6 @@
               borderColor: "rgba(255,99,132,1)",
               pointBorderColor: "#fff",
               pointBackgroundColor: "rgba(255,99,132,1)",
-              pointBorderColor: "#fff",
               data: Array(nAreas-1).fill(client['q16']),
             }]
           }
@@ -104,134 +103,31 @@
 
       }
 
-      $(async function(){
-        // Get information from the row in the spreasheet that corresponds to uid
-        passionHealthDBUrl = sheetUrl.replace("/od6/", "/"+dbIndex+"/")
-        passionHealthResponseUrl = sheetUrl.replace("/od6/", "/1/")
-        passionHealthCategoryUrl = sheetUrl.replace("/od6/", "/2/")
-        passionHealthCalculatedUrl = sheetUrl.replace("/od6/", "/8/")
+      async function start() {
+        // 2. Initialize the JavaScript client library.
+        await gapi.client.init({
+          'apiKey': 'AIzaSyCFUR8GgBqHGGp3rDyhXbXnY-G14tI_UrM',
+          'clientId': '1014599842562-7nh5o8on5lau5p1970lbfr44kqfga559.apps.googleusercontent.com',
+          'scope': 'https://www.googleapis.com/auth/spreadsheets.readonly',
+          'discoveryDocs': ["https://sheets.googleapis.com/$discovery/rest?version=v4"]
+        })
 
-        function passionHealthPromise() {
-          return $.ajax({
-            dataType: "json",
-            url: passionHealthDBUrl,
-            retryLimit: 5,
-            attempt: 1,
-            success: function (data) {
-              return data
-            },
-            error: function (data) {
-              if (this.attempt++ <= this.retryLimit) {
-                var self = this;
-                var retry = function () {
-                  $.ajax(self);
-                };
-                setTimeout(retry, 1000);
-              } else {
-                return data
-              }
-            }
-          })
-        }
-        function passionHealthResponsePromise() {
-          return $.ajax({
-            dataType: "json",
-            url: passionHealthResponseUrl,
-            retryLimit: 5,
-            attempt: 1,
-            success: function (data) {
-              return data
-            },
-            error: function (data) {
-              if (this.attempt++ <= this.retryLimit) {
-                var self = this;
-                var retry = function () {
-                  $.ajax(self);
-                };
-                setTimeout(retry, 1000);
-              } else {
-                return data
-              }
-            }
-          })
-        }
-        function passionHealthCategoryPromise() {
-          return $.ajax({
-            dataType: "json",
-            url: passionHealthCategoryUrl,
-            retryLimit: 5,
-            attempt: 1,
-            success: function (data) {
-              return data
-            },
-            error: function (data) {
-              if (this.attempt++ <= this.retryLimit) {
-                var self = this;
-                var retry = function () {
-                  $.ajax(self);
-                };
-                setTimeout(retry, 1000);
-              } else {
-                return data
-              }
-            }
-          })
-        }
-        function passionHealthCalculatedPromise() {
-          return $.ajax({
-            dataType: "json",
-            url: passionHealthCalculatedUrl,
-            retryLimit: 5,
-            attempt: 1,
-            success: function (data) {
-              return data
-            },
-            error: function (data) {
-              if (this.attempt++ <= this.retryLimit) {
-                var self = this;
-                var retry = function () {
-                  $.ajax(self);
-                };
-                setTimeout(retry, 1000);
-              } else {
-                return data
-              }
-            }
-          })
-        }
+        const spreadsheetId = '1IUmIxekkrg5uE-XXHNZpKUfSue9ntsEoDw9-imypgxU'
+        const getSheet = async sheetName => (
+          await gapi.client.sheets.spreadsheets.values.get({spreadsheetId, range: sheetName})
+        ).result.values
 
-        // Execute after both JSON requests have completed
-        let dataPassionHealthTest = await passionHealthPromise()
-        console.log(1)
-        console.log(dataPassionHealthTest)
-        let dataPassionHealthResponse = await passionHealthResponsePromise()
-        console.log(2)
-        console.log(dataPassionHealthResponse)
-        let dataPassionHealthCategory = await passionHealthCategoryPromise()
-        console.log(3)
-        console.log(dataPassionHealthCategory)
-        let dataPassionHealthCalculated = await passionHealthCalculatedPromise()
-        console.log(4)
-        console.log(dataPassionHealthCalculated)
+        const entryPassionHealthTest = await getSheet('Passion Health Test')
+        const entryPassionHealthResponse = await getSheet('Passion Health Responses')
+        const entryPassionHealthCategory = await getSheet('Passion Health Categories')
+        const entryPassionHealthCalculated = await getSheet('Calculated Test Values')
 
-        // Get relavant data from spreadsheets
-        entryPassionHealthTest = dataPassionHealthTest.feed.entry;
-        entryPassionHealthResponse = dataPassionHealthResponse.feed.entry;
-        entryPassionHealthCategory = dataPassionHealthCategory.feed.entry;
-        entryPassionHealthCalculated = dataPassionHealthCalculated.feed.entry;
-
-        console.log(entryPassionHealthTest)
-        console.log(entryPassionHealthResponse)
-        console.log(entryPassionHealthCategory)
-        console.log(entryPassionHealthCalculated)
+        let categories = entryPassionHealthCategory[0]
+        categories.pop()
 
         // Create client object
         client = createClient(entryPassionHealthTest, entryPassionHealthCalculated, nColumns, nNonScoreColumns, uid);
         $("#card-title").text(client['name'] + "'s Passion Health Report")
-
-        // Get Passion Health Categories as array
-        let categories = getPassionHealthCategories(entryPassionHealthCategory)
-        categories.pop()
 
         // Get report text responses
         let response = formatPassionResponseDB(entryPassionHealthResponse, nPassionResponseDBColumns, nAreas)
@@ -243,13 +139,14 @@
         $("#blurb-dash").append(header, blurb);
 
         // Create chart
-        createChart('passion-chart')
+        createChart('passion-chart', categories, client)
 
         // Get question text
-        let questions = getQuestions(entryPassionHealthTest, nAreas)
+        console.log(entryPassionHealthTest)
+        const questions = entryPassionHealthTest[0].slice(2)
 
         function appendCategoryElements(index) {
-          let header = $("<h3></h3>").text(entryPassionHealthCategory[index-1].content.$t);
+          let header = $("<h3></h3>").text(categories[index-1]);
           let p_explanation = $("<p id=q"+index+"-explanation></p>")
           let p_score = $("<strong><p id=q"+index+"-score></p></strong>")
           let p_main = $("<p id=q"+index+"-main></p>")
@@ -258,16 +155,16 @@
         }
 
         // Inject data into dashboard
-        for (i = 1; i <= nAreas; i++){
+        for (let i = 1; i <= nAreas; i++){
           appendCategoryElements(i)
 
-          q = "#q" + i.toString()
-          qq = "q" + i.toString()
+          const q = "#q" + i.toString()
+          const qq = "q" + i.toString()
 
-          category = getScoreCategory(client[qq])
+          const category = getScoreCategory(client[qq])
 
-          bonusHTML = formatBonusText(response[qq][category]['bonus'])
-          explanationHTML = formatExplanation(response[qq]['explanation'])
+          const bonusHTML = formatBonusText(response[qq][category]['bonus'])
+          const explanationHTML = formatExplanation(response[qq]['explanation'])
           $(q+"-explanation").html(explanationHTML)
           $(q+"-score").html("<strong>You scored " + client[qq] + '/10</strong> when asked: <em>' + questions[i-1] + "</em>")
           $(q+"-bonus").html(bonusHTML)
@@ -275,8 +172,10 @@
         }
 
         $("#passion-chart").clone().attr('id', 'passion-chart2').appendTo("#dashboard");
-        createChart('passion-chart2')
-      });
+        createChart('passion-chart2', categories, client)
+      }
+
+      gapi.load('client', start);
     </script>
 
     <script src="js/extention/choices.js"></script>
