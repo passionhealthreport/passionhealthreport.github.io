@@ -71,13 +71,13 @@
               pointBackgroundColor: "rgba(5, 155, 255, 1)",
               data: scores
             }, {
-              label: "Your Percieved Score",
+              label: "Your Perceived Score",
               fill: true,
               backgroundColor: "rgba(255,99,132,0.1)",
               borderColor: "rgba(255,99,132,1)",
               pointBorderColor: "#fff",
               pointBackgroundColor: "rgba(255,99,132,1)",
-              data: Array(nAreas-1).fill(client['q16']),
+              data: Array(nAreas-1).fill(client['perceived_score']),
             }]
           }
 
@@ -142,7 +142,6 @@
         createChart('passion-chart', categories, client)
 
         // Get question text
-        console.log(entryPassionHealthTest)
         const questions = entryPassionHealthTest[0].slice(2)
 
         function appendCategoryElements(index) {
@@ -166,7 +165,9 @@
           const bonusHTML = formatBonusText(response[qq][category]['bonus'])
           const explanationHTML = formatExplanation(response[qq]['explanation'])
           $(q+"-explanation").html(explanationHTML)
-          $(q+"-score").html("<strong>You scored " + client[qq] + '/10</strong> when asked: <em>' + questions[i-1] + "</em>")
+          $(q+"-score").html(
+            `<strong>For <em>${questions[i-1].replace('?', '')}</em> you scored: ${client[qq]}`
+          )
           $(q+"-bonus").html(bonusHTML)
           $(q+"-main").text(response[qq][category]['main'])
         }

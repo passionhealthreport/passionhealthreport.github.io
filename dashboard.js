@@ -25,13 +25,20 @@ function createClient(entry, calculated, nColumns, nNonScoreColumns, uid) {
     const score = Math.round(sum / nScoreColumns * 10) / 10
 
     // Stores scores and other information about user
-    const [name, email, q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, q11, q12, q13, q14, q15] = entry[matchId]
+    const [
+      name, email,
+      q1, q2, q3, q4, q5,
+      q6, q7, q8, q9, q10,
+      q11, q12, q13, q14,
+      q15, _, perceived_score
+    ] = entry[matchId]
     client = {
         name, email, score,
         q1, q2, q3, q4, q5,
         q6, q7, q8, q9, q10,
         q11, q12, q13, q14, q15,
-        q16: calculated[matchId][2], // Subjective overall score
+        perceived_score,
+        q16: calculated[matchId][2], // Average score
     }
 
     return client;
