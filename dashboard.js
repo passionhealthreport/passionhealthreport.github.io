@@ -37,8 +37,8 @@ function createClient(entry, calculated, nColumns, nNonScoreColumns, uid) {
         q1, q2, q3, q4, q5,
         q6, q7, q8, q9, q10,
         q11, q12, q13, q14, q15,
-        perceived_score,
-        q16: calculated[matchId][2], // Average score
+        q16: perceived_score,
+        avg_score: calculated[matchId][2],
     }
 
     return client;
