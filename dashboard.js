@@ -124,11 +124,11 @@ function formatBonusText(text) {
 // }
 
 function getScoreCategory(score) {
-    if (score < 4){
+    if (score < 3){
         return "low"
-    } else if (score < 8) {
+    } else if (score < 6) {
         return "med"
-    } else if (score <= 9.5) {
+    } else if (score < 10) {
         return "high"
     } else if (score == 10) {
         return "max"
